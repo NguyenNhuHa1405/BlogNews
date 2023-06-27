@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import AuthSchema from '../models/authModel.js';
 export default async function checkLogin(req, res, next) {
-    if(req.path === '/api/user/login' || req.path === '/api/user/register') {
+    if(req.path === '/api/user/login' || req.path === '/api/user/register' || req.path === '/api') {
          next();
          return 
     }

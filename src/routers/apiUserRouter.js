@@ -11,4 +11,7 @@ body('password').isLength({ min: 5 }),
 apiUserController.login);
 router.post('/register', apiUserController.register)
 
+router.post('/sendOtpEmail', apiUserController.sendOtpEmail)
+router.post('/verifyEmail', apiUserController.verifyEmail)
+
 export default router

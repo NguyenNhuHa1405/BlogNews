@@ -10,11 +10,16 @@ class apiController {
     }
     async getDetailsNews(req, res, next) {
         try {
-            const id = req.params.id;
+            const id = req?.params?.id;
             const detailId =  await NewsSchema.findOne({ id }).exec();
-            res.json(detailId)
+            if(detailId) {
+               return res.status(200).json(detailId)
+            }
+           else {
+            return res.status(500).json({ error: 'Khong tim thay'})
+           }
         } catch (error) {
-            
+            return res.status(500).json({ error: 'Khong tim thay'})
         }
     }
 
@@ -22,6 +27,14 @@ class apiController {
         try { 
             await NewsSchema.create(req.body);
             res.json({ success: "Add news successfully"})
+        } catch (error) {
+            res.json({ error: "Khong the them"})
+        }
+    }
+
+    async updateNews(req, res) {
+        try {
+            
         } catch (error) {
             
         }
