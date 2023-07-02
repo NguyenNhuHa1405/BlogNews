@@ -12,6 +12,8 @@ apiUserController.login);
 router.post('/register', apiUserController.register)
 
 router.post('/sendOtpEmail', apiUserController.sendOtpEmail)
-router.post('/verifyEmail', apiUserController.verifyEmail)
+router.post('/verifyEmail', apiUserController.verifyEmail) 
+
+router.post('/refreshToken', apiUserController.refreshToken)
 
 export default router

@@ -2,6 +2,7 @@ import NewsSchema from '../models/newModel.js';
 class apiController {
     async getAllNews(req, res, next) {
         try {
+            console.log(req.data);
             let news = await NewsSchema.find({});
             res.json(news)
         } catch (error) {

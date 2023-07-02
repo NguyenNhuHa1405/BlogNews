@@ -13,7 +13,8 @@ export default async function(req, res, next) {
                 res.status(500).json({message: 'Ban khong co quyen vao trang nay'})
             }
             break;
-        default:     
+        default:  
+            res.status(500).json({message: 'Ban khong co quyen vao trang nay'})   
             break;
 
     }

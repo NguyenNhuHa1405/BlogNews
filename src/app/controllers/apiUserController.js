@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import otpSchema from '../models/otpModel.js'
 import authVerified from '../models/authVerified.js'
 import otpGenerator from 'otp-generator';
+import client from '../../config/redis/connectRedis.js'
 
 class apiUserController {
     async getUser(req, res, next) {
@@ -26,8 +27,10 @@ class apiUserController {
                 if(!!findUser) {
                     const isMatch = await bcrypt.compare(password, findUser.password);
                     if(isMatch) {
-                        const token = jwt.sign({ user }, process.env.PRIVATE_KEY , { expiresIn: "10h"});
-                        return res.json({ token })
+                        const token = jwt.sign({ user }, process.env.PRIVATE_KEY , { expiresIn: "20s"});
+                        const refreshToken = jwt.sign({ user }, process.env.PRIVATE_KEY, {  expiresIn: "1y" });
+                        await client.set(user, refreshToken, 'Ex', 365 * 24 * 60 * 60);
+                        return res.json({ token, refreshToken })
                     }else {
                         return res.status(200).json({ error: 'error' })
                     }
@@ -122,6 +125,29 @@ class apiUserController {
             }
         } catch (error) {
             return res.json({ error: error});
+        }
+    }
+
+    async refreshToken(req, res, next) {
+        try {
+            let { refreshToken } = req.body;
+            const { user } = jwt.verify(refreshToken, process.env.PRIVATE_KEY);
+            const rfToken = await client.get(user);
+            if(!refreshToken){
+                return res.json({error: "RefreshToken khong hop le!"})
+            }
+            else if(rfToken === refreshToken) {
+                const token = jwt.sign({ user }, process.env.PRIVATE_KEY, {expiresIn: '20s'});
+                refreshToken = jwt.sign({ user }, process.env.PRIVATE_KEY, {expiresIn: '1y'});
+                await client.set(user, refreshToken, "Ex", 365 * 24 * 60 * 60)
+                return res.json({ token, refreshToken})
+            }
+            else {
+                return res.json({error: "RefreshToken khong hop le!"})
+            }
+            
+        } catch (error) {
+            return res.json({ error: "RefreshToken khong hop le!" });
         }
     }
 }

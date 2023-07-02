@@ -1,0 +1,14 @@
+POST http://localhost:5005/api/user/login
+content-type: application/json
+
+{
+    "user": "nhuha258@gmail.com",
+    "password": "14052003"
+}
+####
+POST http://localhost:5005/api/user/refreshToken
+content-type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibmh1aGEyNThAZ21haWwuY29tIiwiaWF0IjoxNjg4MTMyMzE0LCJleHAiOjE3MTk2ODk5MTR9.Mb7k1QebEjM4EjHxkUrCPFlsq2GXR04wBGX8MQhTQ6s"
+}
