@@ -14,6 +14,10 @@ router.post('/register', apiUserController.register)
 router.post('/sendOtpEmail', apiUserController.sendOtpEmail)
 router.post('/verifyEmail', apiUserController.verifyEmail) 
 
-router.post('/refreshToken', apiUserController.refreshToken)
+router.post('/refreshToken', apiUserController.refreshToken);
+
+router.post('/sendOtpEmailForgetPw', apiUserController.sendOtpEmailForgetPw);
+router.post('/verifyEmailForgetPw', apiUserController.verifyEmailForgetPw);
+router.post('/forgetPw', apiUserController.forgetPw);
 
 export default router

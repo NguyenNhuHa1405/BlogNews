@@ -12,3 +12,20 @@ content-type: application/json
 {
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibmh1aGEyNThAZ21haWwuY29tIiwiaWF0IjoxNjg4MTMyMzE0LCJleHAiOjE3MTk2ODk5MTR9.Mb7k1QebEjM4EjHxkUrCPFlsq2GXR04wBGX8MQhTQ6s"
 }
+
+###
+POST http://localhost:5005/api/user/sendOtpEmailForgetPw
+content-type: application/json
+
+{
+    "email": "nhuha258@gmail.com"
+}
+
+###
+POST http://localhost:5005/api/user/verifyEmailForgetPw
+content-type: application/json
+
+{
+    "email": "nhuha258@gmail.com",
+    "otp": "712357"
+}

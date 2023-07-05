@@ -7,6 +7,8 @@ import otpSchema from '../models/otpModel.js'
 import authVerified from '../models/authVerified.js'
 import otpGenerator from 'otp-generator';
 import client from '../../config/redis/connectRedis.js'
+import authVerifiedForgetPW from '../models/authVerifiedForgetPW.js'
+
 
 class apiUserController {
     async getUser(req, res, next) {
@@ -50,6 +52,7 @@ class apiUserController {
             const role = 'user';
             let findUser = await AuthSchema.findOne({ user }).exec()
             const emailVerified = await authVerified.findOne({ email }).exec()
+            emailVerified = emailVerified[emailVerified.length - 1];
             if(findUser) {
                 return res.json({ error: 'User already exists' })
             }
@@ -76,7 +79,7 @@ class apiUserController {
     async sendOtpEmail(req, res){
         try {
             const {email} = req.body;
-            const user = await AuthSchema.findOne({ user: email });
+            const user = await AuthSchema.findOne({ email });
             if(user) {
                 return res.json({ error: 'User already exists' })
             }
@@ -106,7 +109,7 @@ class apiUserController {
         try {
             const { email, otp } = req.body;
             const emailOtp =  await otpSchema.find({ email});
-            if(!emailOtp) {
+            if(!emailOtp.toString()) {
                 return res.json({ error:'email not found'});
             }
             const otpHash = emailOtp[emailOtp.length - 1].otp;
@@ -149,6 +152,100 @@ class apiUserController {
         } catch (error) {
             return res.json({ error: "RefreshToken khong hop le!" });
         }
+    }
+
+    async sendOtpEmailForgetPw(req, res) {
+        try {
+            const {email} = req.body;
+            const user = await AuthSchema.findOne({ email });
+            if(!user) {
+                return res.json({ error: 'email not exists' })
+            }
+            const emailOtp = await otpSchema.find({email});
+            if(emailOtp.length >= 5) {
+                return res.json({ error: 'too many send otp'})
+            }
+            else {
+                const OTP = otpGenerator.generate(6, {
+                    digits: true,
+                    lowerCaseAlphabets: false,
+                    upperCaseAlphabets: false,
+                    specialChars: false,
+                })
+                const OTPhash = await bcrypt.hash(OTP, parseInt(process.env.SALT_ROUND))
+                await otpSchema.create({ email, otp: OTPhash });
+                return res.json({ OTP: OTP})
+            }
+            
+        } catch (error) {
+            return res.json({ error: error})
+        }
+    }
+
+    async verifyEmailForgetPw(req, res) {
+        try {
+            const { email, otp } = req.body;
+            const emailOtp =  await otpSchema.find({ email });
+            console.log(emailOtp)
+            if(!emailOtp.toString()) {
+                return res.json({ error:'email not found'});
+            }
+            const otpHash = emailOtp[emailOtp.length - 1].otp;
+            const result = await bcrypt.compare(otp, otpHash);
+            if(result) {
+                let emailVerified = await authVerifiedForgetPW.findOne({ email: email})
+
+                if(emailVerified?.verified) {
+                    return res.json({ result: 'email verified' });
+                }
+                
+                    const emailVerify = await authVerifiedForgetPW.create({ email, verified: true})
+                    return res.json({ emailVerify })
+                
+            }else {
+                return res.json({ error:'Invalid otp' });
+            }
+        } catch (error) {
+            return res.json({ error: error});
+        }
+    }
+
+    async forgetPw(req, res) {
+        try {
+            const { email, password, authpassword } = req.body;
+            if(! (password === authpassword)) {
+                return res.josn({ error:" password does not match"})
+            }
+            const userFind = await AuthSchema.findOne({ email }).exec() 
+            const userVerifiedFind = await authVerifiedForgetPW.findOne({ email });
+            if(!userFind) {
+                res.json({ error: "User not exists"})
+            }
+            if(!userVerifiedFind) {
+                return res.json( { error: 'Unable to restore'});
+            }
+            const verified = userVerifiedFind?.verified;
+            console.log(verified)
+            if(!verified) {
+                res.json({ error: 'unverified email' }) 
+            }
+            await bcrypt.hash(password, parseInt(process.env.SALT_ROUND)).then( async function(hash) {
+                const passwordHash = hash;
+                console.log(passwordHash)
+                await AuthSchema.updateOne({
+                    email
+                }, {
+                    password: passwordHash,
+                });
+                await authVerifiedForgetPW.updateOne( {email}, {
+                    verified: false,
+                })
+                return res.json({ success: 'password reset successful'})
+            });
+        } catch (error) {
+            return res.json({ error: "Unable to restore" });
+        }
+
     }
 }
 

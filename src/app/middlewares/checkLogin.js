@@ -5,7 +5,10 @@ export default async function checkLogin(req, res, next) {
     || req.path === '/api/user/register' 
     || req.path === '/api/user/sendOtpEmail' 
     || req.path === '/api/user/verifyEmail'
-    || req.path === '/api/user/refreshToken') {
+    || req.path === '/api/user/refreshToken'
+    || req.path === '/api/user/sendOtpEmailForgetPw'
+    || req.path === '/api/user/verifyEmailForgetPw'
+    || req.path === '/api/user/forgetPw') {
          next();
          return 
     }
