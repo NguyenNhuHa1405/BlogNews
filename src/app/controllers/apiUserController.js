@@ -49,7 +49,6 @@ class apiUserController {
     async register(req, res, next) {
         try {
             const { user, password, address, phoneNumber, email } = req.body
-            const role = 'user';
             let findUser = await AuthSchema.findOne({ user }).exec()
             const emailVerified = await authVerified.findOne({ email }).exec()
             emailVerified = emailVerified[emailVerified.length - 1];
@@ -65,7 +64,7 @@ class apiUserController {
                 await AuthSchema.create({
                     user,
                     password: passwordHash,
-                    phoneNumber, address, role, email
+                    phoneNumber, address, email
                 });
                 return res.json({ success: 'register successfully'})
             });
