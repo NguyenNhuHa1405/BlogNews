@@ -1,13 +1,10 @@
 export default {
     Authorization(role) {
-        var user = req.User;
-        if(user.Role == role) {
-            return (req, res, next) => {
-                next();
-            }
-        }
         return (req, res, next) => {
-            return res.json({ success: 1, message: "Không có quyền truy cập" })
+            var user = req.User;
+            if(!user) return res.redirect("/login")
+            if(user.Role == role) return next();
+            res.json({ message: "Không thể truy cập "});
         }
     }
 }
