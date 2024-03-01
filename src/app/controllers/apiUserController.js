@@ -25,7 +25,6 @@ class apiUserController {
             if (result.isEmpty()) {
                 const { user, password } = req.body
                 let findUser = await AuthSchema.findOne({ user }).exec()
-                const { role } = findUser
                 if(!!findUser) {
                     const isMatch = await bcrypt.compare(password, findUser.password);
                     if(isMatch) {
@@ -50,8 +49,8 @@ class apiUserController {
         try {
             const { user, password, address, phoneNumber, email } = req.body
             let findUser = await AuthSchema.findOne({ user }).exec()
-            const emailVerified = await authVerified.findOne({ email }).exec()
-            emailVerified = emailVerified[emailVerified.length - 1];
+            var emailVerified = await authVerified.findOne({ email }).exec()
+            
             if(findUser) {
                 return res.json({ error: 'User already exists' })
             }
@@ -59,15 +58,13 @@ class apiUserController {
                 return res.json({ error: 'email not verify'})
             }
             
-            await bcrypt.hash(password, parseInt(process.env.SALT_ROUND)).then( async function(hash) {
-                const passwordHash = hash;
-                await AuthSchema.create({
-                    user,
-                    password: passwordHash,
-                    phoneNumber, address, email
-                });
-                return res.json({ success: 'register successfully'})
+            const passwordHash = await bcrypt.hash(password, parseInt(process.env.SALT_ROUND));
+            await AuthSchema.create({
+                user,
+                password: passwordHash,
+                phoneNumber, address, email
             });
+            return res.json({ success: 'register successfully'})
             
         } catch (error) {
             // throw new Exception(Exception.CANNOT_REGISTER_USER)
@@ -106,6 +103,7 @@ class apiUserController {
 
     async verifyEmail(req, res, next) {
         try {
+            
             const { email, otp } = req.body;
             const emailOtp =  await otpSchema.find({ email});
             if(!emailOtp.toString()) {

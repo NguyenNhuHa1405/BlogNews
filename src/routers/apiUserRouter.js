@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import apiUserController from '../app/controllers/apiUserController.js';
 import { body, validationResult } from 'express-validator';
+import passport from 'passport';
 
 
 router.get('/:id', apiUserController.getUser)
@@ -19,5 +20,8 @@ router.post('/refreshToken', apiUserController.refreshToken);
 router.post('/sendOtpEmailForgetPw', apiUserController.sendOtpEmailForgetPw);
 router.post('/verifyEmailForgetPw', apiUserController.verifyEmailForgetPw);
 router.post('/forgetPw', apiUserController.forgetPw);
+
+router.get('/login/federated/facebook', passport.authenticate('facebook'));
+
 
 export default router
